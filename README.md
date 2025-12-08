@@ -10,7 +10,7 @@
 
 **使用 AI 自動生成專業問卷並直接建立 Google Forms**
 
-[📊 完整簡報連結](https://chatgpt3a01.github.io/CH6_AI_Form_Generator/) | [📘 Facebook](https://www.facebook.com/iddmail) | [🎥 YouTube](https://www.youtube.com/@Liang-yt02)
+[📊 完整簡報連結](https://chatgpt3a01.github.io/AI_Form_Generator/) | [📘 Facebook](https://www.facebook.com/iddmail) | [🎥 YouTube](https://www.youtube.com/@Liang-yt02)
 
 </div>
 
@@ -63,12 +63,12 @@
 
 ### 方法一：使用 Git Clone
 ```bash
-git clone https://github.com/ChatGPT3a01/CH6_AI_Form_Generator.git
-cd CH6_AI_Form_Generator
+git clone https://github.com/ChatGPT3a01/AI_Form_Generator.git
+cd AI_Form_Generator
 ```
 
 ### 方法二：直接下載 ZIP
-1. 前往 [GitHub Repository](https://github.com/ChatGPT3a01/CH6_AI_Form_Generator)
+1. 前往 [GitHub Repository](https://github.com/ChatGPT3a01/AI_Form_Generator)
 2. 點擊綠色「Code」按鈕
 3. 選擇「Download ZIP」
 4. 解壓縮到您的工作目錄
@@ -208,7 +208,7 @@ waitress-serve --port=8000 app:app
 ## 📁 專案結構
 
 ```
-CH6_AI_Form_Generator/
+AI_Form_Generator/
 ├── app.py              # Flask 主應用程式
 ├── gas_code.js         # Google Apps Script 程式碼
 ├── templates/
