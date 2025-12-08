@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 CH6 Part 1 - 快速開始：3分鐘生成第一份AI問卷</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 10000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-buttons { display: flex; gap: 12px; }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.25);
+            color: white;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.4);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 9000;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-arrow:hover {
+            background: rgba(255,255,255,0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+        .prev-arrow { left: 30px; }
+        .next-arrow { right: 30px; }
+        .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            padding-top: 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .slide {
+            position: absolute;
+            top: 60px; left: 0;
+            width: 100%;
+            height: calc(100vh - 60px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 10;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 20;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            max-width: 1400px;
+            width: 95%;
+            max-height: 88vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        h1 { color: #1e3c72; font-size: 56px; margin-bottom: 24px; text-align: center; }
+        h2 { color: #2a5298; font-size: 38px; margin-bottom: 35px; border-bottom: 3px solid #1e3c72; padding-bottom: 12px; }
+        h3 { color: #1e3c72; font-size: 26px; margin: 30px 0 15px 0; }
+        p, li { font-size: 20px; line-height: 1.8; color: #444; margin-bottom: 15px; }
+        code { background: #f0f2f5; padding: 3px 8px; border-radius: 6px; font-family: monospace; color: #d63384; font-weight: 600; font-size: 0.95em; }
+        pre { background: #282c34; color: #abb2bf; padding: 25px; border-radius: 12px; overflow-x: auto; margin: 25px 0; font-size: 18px; line-height: 1.6; font-family: monospace; }
+        .box { padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 6px solid; font-size: 20px; }
+        .info { background: #e3f2fd; border-color: #2196f3; color: #0d47a1; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .success { background: #d4edda; border-color: #28a745; color: #155724; }
+        .highlight { background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #004d40; }
+
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .concept-card { background: #f8f9fa; padding: 25px; border-radius: 15px; border: 1px solid #e9ecef; transition: transform 0.3s; }
+        .concept-card:hover { transform: translateY(-8px); border-color: #4facfe; }
+
+        .step-list { counter-reset: step-counter; list-style: none; padding: 0; }
+        .step-list li { counter-increment: step-counter; position: relative; padding-left: 60px; margin-bottom: 25px; }
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .screenshot-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .screenshot-container img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .screenshot-caption {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .indicators { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 4000; padding: 10px 25px; background: rgba(0,0,0,0.3); border-radius: 30px; backdrop-filter: blur(5px); }
+        .dot { width: 12px; height: 12px; background: rgba(255,255,255,0.4); border-radius: 50%; cursor: pointer; }
+        .dot.active { background: #4facfe; transform: scale(1.3); }
+
+        .footer-credit {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-title">📋 CH6 Part 1 - 快速開始：3分鐘生成第一份AI問卷</div>
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn">🏠 統整頁</a>
+            <button class="nav-btn" onclick="toggleFullscreen()">🖥️ 全螢幕</button>
+            <a href="https://www.facebook.com/iddmail" target="_blank" class="nav-btn">📘 FB</a>
+            <a href="https://www.youtube.com/@Liang-yt02" target="_blank" class="nav-btn">🎥 YT</a>
+        </div>
+    </div>
+
+    <div class="slide-container">
+
+        <!-- Slide 1: 封面 -->
+        <div class="slide active">
+            <div class="content-card" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h4 style="color: #4facfe; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px;">CH6 AI 問卷自動生成系統</h4>
+                <h1>Part 1: 快速開始</h1>
+                <h2 style="border: none; font-weight: normal; font-size: 28px; color: #666; max-width: 800px;">
+                    3分鐘內生成您的第一份專業 AI 問卷
+                </h2>
+                <div style="margin-top: 40px; display: flex; gap: 20px;">
+                    <span class="highlight">Flask</span>
+                    <span class="highlight">Google Apps Script</span>
+                    <span class="highlight">Gemini AI</span>
+                    <span class="highlight">Google Forms</span>
+                </div>
+                <div class="footer-credit">
+                    © 2026 自己架設 AI - 零基礎到大師 | Made with 曾慶良(阿亮老師) ❤️
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: 學習目標 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🎯 本單元學習目標</h2>
+                <p>採用「先實作後教學」的方式，讓您親眼見證 AI 問卷生成的威力！</p>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>🔑 準備 API Key</h3>
+                        <p>申請 Google Gemini AI API Key，開啟 AI 能力的大門。</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>⚙️ 部署 GAS</h3>
+                        <p>設定 Google Apps Script 作為系統的核心中介層。</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>🚀 啟動 Flask</h3>
+                        <p>運行 Python Flask 網頁應用，提供使用者介面。</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>📋 生成問卷</h3>
+                        <p>輸入需求，5秒內獲得完整的 Google Forms 問卷！</p>
+                    </div>
+                </div>
+                <div class="box info">
+                    <strong>為什麼要快速體驗？</strong> 當你親眼看到系統的威力後，學習技術細節時會更有動力！
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 系統運作流程 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🔄 系統運作流程預覽</h2>
+                <p>了解整個系統如何運作，三層架構完美配合：</p>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>1️⃣ Flask 網頁介面</h3>
+                        <p>使用者在網頁上輸入問卷需求（主題、題數、題型配比等）。</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>2️⃣ Google Apps Script</h3>
+                        <p>接收請求，呼叫 Gemini AI 生成題目，建立 Google Forms。</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>3️⃣ 返回結果</h3>
+                        <p>返回問卷編輯連結和填寫連結，立即可用！</p>
+                    </div>
+                </div>
+                <pre>
+使用者 ─► Flask ─► Google Apps Script ─► Gemini AI
+                         │                    │
+                         ▼                    ▼
+                   Google Forms ◄─── 問卷題目 JSON
+                </pre>
+            </div>
+        </div>
+
+        <!-- Slide 4: 第一步 - API Key -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🔑 第一步：準備 Google AI API Key（30秒）</h2>
+                <ol class="step-list">
+                    <li>前往 <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a></li>
+                    <li>登入您的 Google 帳號</li>
+                    <li>點擊「Get API Key」按鈕</li>
+                    <li>建立新的 API Key</li>
+                    <li>複製這個 Key（格式為 <code>AIzaSy...</code>）</li>
+                </ol>
+                <div class="box success">
+                    <strong>💡 免費額度充足：</strong>Gemini 每分鐘 15 次請求，每天 1500 次，對於測試和個人使用完全足夠！
+                </div>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_api_key_creation.png" alt="API Key 建立畫面">
+                    <div class="screenshot-caption">Google AI Studio API Key 建立頁面</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 第二步 - 部署 GAS -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>⚙️ 第二步：部署 Google Apps Script（1分鐘）</h2>
+                <ol class="step-list">
+                    <li>前往 <a href="https://script.google.com/" target="_blank">Google Apps Script</a></li>
+                    <li>點擊「新專案」，命名為「AI 問卷生成器」</li>
+                    <li>將專案中的 <code>gas_code.js</code> 內容貼入編輯器</li>
+                    <li>點擊「部署」→「新增部署作業」</li>
+                    <li>選擇「網頁應用程式」，權限設為「所有人」</li>
+                    <li>完成授權流程</li>
+                    <li>複製部署完成的 URL</li>
+                </ol>
+                <div class="box warning">
+                    <strong>⚠️ 注意：</strong>授權時會出現「Google 尚未驗證」警告，點擊「進階」→「前往專案」→「允許」即可。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: GAS 部署截圖 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>📸 GAS 部署設定畫面</h2>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_gas_deployment.png" alt="GAS 部署設定">
+                    <div class="screenshot-caption">部署類型選擇「網頁應用程式」，權限設為「所有人」</div>
+                </div>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_gas_url.png" alt="GAS URL">
+                    <div class="screenshot-caption">部署完成後複製 URL</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: 第三步 - 啟動 Flask -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🚀 第三步：啟動 Flask 應用（30秒）</h2>
+                <ol class="step-list">
+                    <li>開啟 <code>app.py</code>，找到第 16 行</li>
+                    <li>將 GAS URL 替換為您剛才複製的部署 URL</li>
+                    <li>儲存檔案</li>
+                    <li>在終端機執行以下指令：</li>
+                </ol>
+                <pre>
+cd D:\自己架設AI_零基礎到大師\CH6_AI_生成表單系統
+python app.py
+                </pre>
+                <div class="box success">
+                    Flask 應用會在 <code>http://127.0.0.1:5000</code> 啟動！
+                </div>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_flask_startup.png" alt="Flask 啟動">
+                    <div class="screenshot-caption">終端機顯示「Running on http://127.0.0.1:5000」</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: 第四步 - 生成問卷 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>📋 第四步：生成第一份 AI 問卷（1分鐘）</h2>
+                <p>開啟瀏覽器訪問 <code>http://127.0.0.1:5000</code>，填入以下資訊：</p>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>🔑 API Key</h3>
+                        <p>貼上第一步取得的 Gemini API Key</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>📂 問卷主題</h3>
+                        <p>輸入「顧客滿意度調查」</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>📊 題目數量</h3>
+                        <p>輸入 <code>5</code></p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>🧩 題型配比</h3>
+                        <p>輸入「單選3,多選1,文字1」</p>
+                    </div>
+                </div>
+                <div class="box info">
+                    <strong>關鍵字：</strong>服務品質,產品滿意度,客服態度<br>
+                    <strong>問卷目的：</strong>了解顧客對本公司服務的整體滿意度
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: 生成結果展示 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>✅ 生成結果展示</h2>
+                <p>點擊「生成問卷內容」按鈕後，幾秒鐘內就會看到結果！</p>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_form_filled.png" alt="表單填寫">
+                    <div class="screenshot-caption">網頁介面填入範例資料</div>
+                </div>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_generation_result.png" alt="生成結果">
+                    <div class="screenshot-caption">AI 生成的 JSON 結果和問卷連結</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Google Forms 成品 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🎉 自動生成的 Google Forms</h2>
+                <div class="screenshot-container">
+                    <img src="../截圖/ch6_google_form.png" alt="Google Forms">
+                    <div class="screenshot-caption">完整的專業問卷，立即可用！</div>
+                </div>
+                <div class="box success">
+                    <strong>🎯 效率提升 500 倍！</strong><br>
+                    傳統方式製作問卷需要 40 分鐘，現在只需 5 秒鐘！
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: 總結 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>📝 Part 1 總結</h2>
+                <p>恭喜您完成了第一份 AI 自動生成的問卷！回顧一下您做了什麼：</p>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>✅ 準備 API Key</h3>
+                        <p>在 Google AI Studio 申請 Gemini API Key</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ 部署 GAS</h3>
+                        <p>將程式碼部署為網頁應用程式</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ 啟動 Flask</h3>
+                        <p>設定 URL 並啟動本地伺服器</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ 生成問卷</h3>
+                        <p>輸入需求，獲得完整問卷！</p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="Part2.html" class="nav-btn" style="background: #1e3c72; padding: 15px 40px; font-size: 18px;">
+                        前往 Part 2：系統價值與應用場景 ➡️
+                    </a>
+                </div>
+                <div class="footer-credit">
+                    © 2026 自己架設 AI - 零基礎到大師 | Made with 曾慶良(阿亮老師) ❤️
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="nav-arrow prev-arrow" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+    <button class="nav-arrow next-arrow" id="nextBtn" onclick="changeSlide(1)">❯</button>
+
+    <div class="indicators" id="indicatorContainer"></div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function init() {
+            createIndicators();
+            showSlide(0);
+            updateButtons();
+            document.addEventListener('keydown', handleKeydown);
+        }
+
+        function handleKeydown(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        }
+
+        function createIndicators() {
+            const container = document.getElementById('indicatorContainer');
+            container.innerHTML = '';
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.onclick = () => goToSlide(index);
+                container.appendChild(dot);
+            });
+        }
+
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            currentSlide = index;
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => dot.classList.toggle('active', idx === index));
+            updateButtons();
+        }
+
+        function changeSlide(direction) { showSlide(currentSlide + direction); }
+        function goToSlide(index) { showSlide(index); }
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

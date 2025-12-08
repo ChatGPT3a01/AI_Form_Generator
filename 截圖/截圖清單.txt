@@ -1,0 +1,14 @@
+截圖清單
+
+  | #   | 檔案名稱                         | 截圖內容說明                             | 所在章節    |
+  |-----|------------------------------|------------------------------------|---------|
+  | 1   | ch6_api_key_creation.png     | Google AI Studio 建立和複製 API Key 的頁面 | 6.1 第一步 |
+  | 2   | ch6_gas_deployment.png       | Google Apps Script 部署類型和權限設定畫面     | 6.1 第二步 |
+  | 3   | ch6_gas_url.png              | 部署完成後複製部署 URL 的位置                  | 6.1 第二步 |
+  | 4   | ch6_flask_startup.png        | 終端機顯示 Flask 啟動成功訊息                 | 6.1 第三步 |
+  | 5   | ch6_form_filled.png          | 網頁介面所有欄位填入範例資料的狀態                  | 6.1 第四步 |
+  | 6   | ch6_generation_result.png    | AI 生成的 JSON 結果和問卷連結展示              | 6.1 第四步 |
+  | 7   | ch6_google_form.png          | 自動生成的 Google Forms 問卷成品            | 6.1 第四步 |
+  | 8   | ch6_monthly_params_sheet.png | Google Sheets 每月調查參數管理表欄位設計        | 6.6 案例一 |
+
+

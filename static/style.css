@@ -1,0 +1,42 @@
+body {
+  font-family: "微軟正黑體", sans-serif;
+  margin: 40px auto;
+  width: 600px;
+  background: #f2f7fa;
+  color: #333;
+}
+h2 {
+  text-align: center;
+  color: #007bff;
+}
+label {
+  display: block;
+  margin-top: 15px;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background: #0056b3;
+}
+pre {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 15px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}

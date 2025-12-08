@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>AI 問卷自動生成系統</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>📋 AI 問卷自動生成系統</h2>
+
+  <form id="form">
+    <label>🏢 API 提供商：</label>
+    <select id="provider" onchange="updateModels()">
+      <option value="google">Google Gemini</option>
+      <option value="openai">OpenAI GPT</option>
+    </select>
+
+    <label id="apiKeyLabel">🔑 Google AI API Key：</label>
+    <input type="text" id="apiKey" placeholder="請貼上你的 API Key" required>
+
+    <label>🤖 模型選擇：</label>
+    <select id="model">
+      <!-- 由 JavaScript 動態填入 -->
+    </select>
+
+    <label>📂 問卷主題：</label>
+    <input type="text" id="category" placeholder="例如：顧客滿意度調查" required>
+
+    <label>📊 題目數量：</label>
+    <input type="number" id="questionCount" value="5" min="1" required>
+
+    <label>🧩 題型配比（例如：單選2，多選1，文字2）：</label>
+    <input type="text" id="questionTypes" placeholder="單選2，多選1，文字2" required>
+
+    <label>🔍 關鍵字：</label>
+    <input type="text" id="keywords" placeholder="例如：服務、產品品質、客服態度" required>
+
+    <label>🎯 問卷目的：</label>
+    <textarea id="purpose" placeholder="請輸入問卷的主要目的" required></textarea>
+
+    <button type="submit">🚀 生成問卷內容</button>
+  </form>
+
+  <h3>📄 AI 生成結果：</h3>
+  <pre id="output"></pre>
+
+  <div id="formLinks"></div>
+
+  <script>
+    // 模型選項配置
+    const models = {
+      google: [
+        { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+        { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+        { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+        { value: 'gemini-2.0-pro', label: 'Gemini 2.0 Pro' }
+      ],
+      openai: [
+        { value: 'gpt-4o', label: 'GPT-4o' },
+        { value: 'gpt-4.1', label: 'GPT-4.1' },
+        { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+        { value: 'gpt-4.5-preview', label: 'GPT-4.5 Preview' }
+      ]
+    };
+
+    // 更新模型選項
+    function updateModels() {
+      const provider = document.getElementById('provider').value;
+      const modelSelect = document.getElementById('model');
+      const apiKeyLabel = document.getElementById('apiKeyLabel');
+      const apiKeyInput = document.getElementById('apiKey');
+
+      // 更新 API Key 標籤和提示
+      if (provider === 'google') {
+        apiKeyLabel.textContent = '🔑 Google AI API Key：';
+        apiKeyInput.placeholder = '請貼上你在 Google AI Studio 申請的 API Key';
+      } else {
+        apiKeyLabel.textContent = '🔑 OpenAI API Key：';
+        apiKeyInput.placeholder = '請貼上你在 OpenAI 申請的 API Key（sk-...）';
+      }
+
+      // 更新模型下拉選單
+      modelSelect.innerHTML = '';
+      models[provider].forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = model.label;
+        modelSelect.appendChild(option);
+      });
+    }
+
+    // 頁面載入時初始化
+    updateModels();
+
+    // 表單提交
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      document.getElementById('output').textContent = "⏳ AI 正在生成問卷內容中...";
+      document.getElementById('formLinks').innerHTML = "";
+
+      const data = {
+        provider: document.getElementById('provider').value,
+        apiKey: document.getElementById('apiKey').value,
+        model: document.getElementById('model').value,
+        category: document.getElementById('category').value,
+        questionCount: document.getElementById('questionCount').value,
+        keywords: document.getElementById('keywords').value,
+        purpose: document.getElementById('purpose').value,
+        questionTypes: document.getElementById('questionTypes').value
+      };
+
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.status === 'error') {
+          document.getElementById('output').textContent = "❌ 錯誤：" + result.message;
+          document.getElementById('formLinks').innerHTML = `<p style="color:red;">⚠️ 生成失敗，請檢查 API Key 和網路連線</p>`;
+          return;
+        }
+
+        document.getElementById('output').textContent = JSON.stringify(result.ai_result, null, 2);
+
+        if (result.form_result && result.form_result.editUrl) {
+          document.getElementById('formLinks').innerHTML = `
+            <h3>✅ 問卷建立成功！</h3>
+            <p><a href="${result.form_result.editUrl}" target="_blank">🧩 編輯問卷連結</a></p>
+            <p><a href="${result.form_result.responseUrl}" target="_blank">📝 使用者填寫連結</a></p>
+          `;
+        } else {
+          document.getElementById('formLinks').innerHTML = `<p style="color:red;">⚠️ 無法建立問卷，請檢查 GAS 網址是否正確</p>`;
+        }
+      } catch (error) {
+        document.getElementById('output').textContent = "❌ 發生錯誤：" + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

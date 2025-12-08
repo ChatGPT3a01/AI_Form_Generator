@@ -1,0 +1,60 @@
+# 書籍教學文件（販售內容，禁止上傳）
+book/
+*.md
+!README.md
+*.docx
+*.doc
+
+# Claude 設定
+.claude/
+
+# Python 快取
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虛擬環境
+venv/
+ENV/
+env/
+.venv/
+
+# IDE 設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日誌檔案
+*.log
+
+# 環境變數和敏感資訊
+.env
+.env.local
+*.key
+*_key.txt
+credentials.json
+token.json

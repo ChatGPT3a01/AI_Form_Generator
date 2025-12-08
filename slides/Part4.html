@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 CH6 Part 4 - Gemini 提示詞工程與 AI 互動</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; overflow: hidden; color: #333; }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.2); display: flex; justify-content: space-between; align-items: center; padding: 0 30px; z-index: 10000; }
+        .nav-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+        .nav-buttons { display: flex; gap: 12px; }
+        .nav-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
+        .nav-arrow { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.25); color: white; width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); font-size: 24px; cursor: pointer; z-index: 9000; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .nav-arrow:hover { background: rgba(255,255,255,0.5); transform: translateY(-50%) scale(1.1); }
+        .prev-arrow { left: 30px; } .next-arrow { right: 30px; }
+        .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+        .slide-container { width: 100%; height: 100vh; padding-top: 60px; position: relative; z-index: 1; }
+        .slide { position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); display: none; align-items: center; justify-content: center; padding: 40px; opacity: 0; transition: opacity 0.4s ease; z-index: 10; }
+        .slide.active { display: flex; opacity: 1; z-index: 20; }
+        .content-card { background: rgba(255, 255, 255, 0.98); border-radius: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); padding: 60px; max-width: 1400px; width: 95%; max-height: 88vh; overflow-y: auto; }
+        h1 { color: #1e3c72; font-size: 56px; margin-bottom: 24px; text-align: center; }
+        h2 { color: #2a5298; font-size: 38px; margin-bottom: 35px; border-bottom: 3px solid #1e3c72; padding-bottom: 12px; }
+        h3 { color: #1e3c72; font-size: 26px; margin: 30px 0 15px 0; }
+        p, li { font-size: 20px; line-height: 1.8; color: #444; margin-bottom: 15px; }
+        code { background: #f0f2f5; padding: 3px 8px; border-radius: 6px; font-family: monospace; color: #d63384; font-weight: 600; }
+        pre { background: #282c34; color: #abb2bf; padding: 25px; border-radius: 12px; overflow-x: auto; margin: 25px 0; font-size: 16px; line-height: 1.6; font-family: monospace; }
+        .box { padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 6px solid; font-size: 20px; }
+        .info { background: #e3f2fd; border-color: #2196f3; color: #0d47a1; }
+        .success { background: #d4edda; border-color: #28a745; color: #155724; }
+        .warning { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .highlight { background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #004d40; }
+        .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .concept-card { background: #f8f9fa; padding: 25px; border-radius: 15px; border: 1px solid #e9ecef; transition: transform 0.3s; }
+        .concept-card:hover { transform: translateY(-8px); border-color: #4facfe; }
+        .prompt-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin: 15px 0; }
+        .indicators { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 4000; padding: 10px 25px; background: rgba(0,0,0,0.3); border-radius: 30px; }
+        .dot { width: 12px; height: 12px; background: rgba(255,255,255,0.4); border-radius: 50%; cursor: pointer; }
+        .dot.active { background: #4facfe; transform: scale(1.3); }
+        .footer-credit { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e0e0e0; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <div class="nav-title">📋 CH6 Part 4 - Gemini 提示詞工程與 AI 互動</div>
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn">🏠 統整頁</a>
+            <a href="Part3.html" class="nav-btn">⬅️ Part 3</a>
+            <a href="Part5.html" class="nav-btn">Part 5 ➡️</a>
+            <a href="https://www.facebook.com/iddmail" target="_blank" class="nav-btn">📘 FB</a>
+            <a href="https://www.youtube.com/@Liang-yt02" target="_blank" class="nav-btn">🎥 YT</a>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <!-- Slide 1: 封面 -->
+        <div class="slide active">
+            <div class="content-card" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h4 style="color: #4facfe; letter-spacing: 2px; margin-bottom: 10px;">CH6 AI 問卷自動生成系統</h4>
+                <h1>Part 4: 提示詞工程</h1>
+                <h2 style="border: none; font-weight: normal; font-size: 28px; color: #666; max-width: 800px;">
+                    如何設計提示詞，讓 Gemini AI 生成高品質問卷
+                </h2>
+                <div style="margin-top: 40px; display: flex; gap: 20px;">
+                    <span class="highlight">Prompt Engineering</span>
+                    <span class="highlight">JSON 輸出</span>
+                    <span class="highlight">品質優化</span>
+                </div>
+                <div class="footer-credit">© 2026 自己架設 AI - 零基礎到大師 | Made with 曾慶良(阿亮老師) ❤️</div>
+            </div>
+        </div>
+
+        <!-- Slide 2: 提示詞的黃金結構 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>✨ 提示詞的黃金結構</h2>
+                <p>精心設計的提示詞，運用多個提示詞工程原則，確保 AI 產出符合格式的結果。</p>
+                <div class="concept-grid">
+                    <div class="prompt-section">
+                        <h3 style="color: white;">1️⃣ 任務定義</h3>
+                        <p style="color: rgba(255,255,255,0.9);">「請為『某主題』生成 N 個問卷題目」</p>
+                    </div>
+                    <div class="prompt-section">
+                        <h3 style="color: white;">2️⃣ 上下文資訊</h3>
+                        <p style="color: rgba(255,255,255,0.9);">題型配比、關鍵字、問卷目的</p>
+                    </div>
+                    <div class="prompt-section">
+                        <h3 style="color: white;">3️⃣ 輸出格式規範</h3>
+                        <p style="color: rgba(255,255,255,0.9);">完整的 JSON 結構範例</p>
+                    </div>
+                    <div class="prompt-section">
+                        <h3 style="color: white;">4️⃣ 品質要求</h3>
+                        <p style="color: rgba(255,255,255,0.9);">題目清楚、選項合理、遵守格式</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 完整提示詞範例 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>📝 完整提示詞範例</h2>
+                <pre style="font-size: 15px;">
+請為「${data.category}」主題生成 ${data.questionCount} 個問卷題目。
+
+題型配比：${data.questionTypes}
+關鍵字：${data.keywords}
+問卷目的：${data.purpose}
+
+請以 JSON 格式回傳，格式如下：
+{
+  "questions": [
+    {
+      "question": "題目文字",
+      "type": "單選" 或 "多選" 或 "文字",
+      "options": ["選項1", "選項2", ...] // 文字題可省略此欄位
+    }
+  ]
+}
+
+請確保：
+1. 題目清楚且符合主題
+2. 選項合理且互斥
+3. 題型符合配比要求
+4. 嚴格遵守 JSON 格式
+                </pre>
+            </div>
+        </div>
+
+        <!-- Slide 4: Show Don't Tell -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>💡 重要原則：Show, Don't Tell</h2>
+                <div class="concept-grid">
+                    <div class="concept-card" style="border-color: #dc3545;">
+                        <h3>❌ 不好的寫法</h3>
+                        <p>「請用 JSON 格式，包含 questions 陣列，每個問題有 question、type、options 欄位」</p>
+                    </div>
+                    <div class="concept-card" style="border-color: #28a745;">
+                        <h3>✅ 好的寫法</h3>
+                        <p>直接展示完整的 JSON 範例結構，AI 看到範例後能精確複製</p>
+                    </div>
+                </div>
+                <div class="box success">
+                    <strong>展示範例比描述規則更有效！</strong>AI 能從範例中學習結構，而不是靠理解文字描述來猜測格式。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Gemini API 呼叫 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🔌 Gemini API 呼叫細節</h2>
+                <p>API URL 格式：</p>
+                <pre>https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}</pre>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>gemini-2.5-flash</h3>
+                        <p>速度快，適合即時回應場景，推薦日常使用</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>gemini-2.5-pro</h3>
+                        <p>品質更高，適合複雜任務，API 額度消耗較快</p>
+                    </div>
+                </div>
+                <div class="box info">
+                    <strong>請求體格式：</strong><code>{contents: [{parts: [{text: "提示詞"}]}]}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: 解析 AI 回應 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🔍 解析 AI 回應的技巧</h2>
+                <p>AI 有時會加上額外的說明文字，需要提取純 JSON：</p>
+                <pre>
+// AI 回應可能是：
+以下是為「顧客滿意度調查」生成的問卷題目：
+{"questions": [...]}
+希望這些題目能幫助您！
+
+// 使用正則表達式提取：
+const jsonMatch = text.match(/\{[\s\S]*\}/);
+if (jsonMatch) {
+  return JSON.parse(jsonMatch[0]);
+}
+                </pre>
+                <div class="box warning">
+                    <strong>兩階段處理：</strong>正則提取 + JSON 解析 = 穩定的 AI 輸出處理
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: 優化技巧 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>🚀 提示詞優化技巧</h2>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>技巧一：提供正面範例</h3>
+                        <p>加入一兩個實際的好問題作為示範，few-shot learning</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>技巧二：明確禁止行為</h3>
+                        <p>「不要生成一題多問」「不要使用誘導性語言」</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>技巧三：調整溫度</h3>
+                        <p>temperature 0.3 = 保守穩定，0.9 = 多樣創新</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>技巧四：迭代優化</h3>
+                        <p>生成 10-20 次，觀察結果，修改提示詞，重複</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Token 與成本 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>💰 Token 用量與成本控制</h2>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>什麼是 Token？</h3>
+                        <p>約 4 個英文字元或 1-2 個中文字</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>單次問卷生成</h3>
+                        <p>提示詞 300-500 tokens + 輸出 500-1000 tokens ≈ 800-1500</p>
+                    </div>
+                </div>
+                <div class="box success">
+                    <strong>Gemini 免費額度：</strong>每分鐘 15 次請求、每天 1500 次，個人使用完全足夠！
+                </div>
+                <h3>節省成本的方法：</h3>
+                <ul>
+                    <li>批次生成：一次請求生成多份問卷</li>
+                    <li>快取常用提示詞片段</li>
+                    <li>使用較小模型或限制 max_tokens</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: 總結 -->
+        <div class="slide">
+            <div class="content-card">
+                <h2>📝 Part 4 總結</h2>
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>✅ 黃金結構</h3>
+                        <p>任務定義 + 上下文 + 格式規範 + 品質要求</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ Show Don't Tell</h3>
+                        <p>展示完整範例比描述規則更有效</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ 穩定解析</h3>
+                        <p>正則提取 + JSON 解析處理 AI 輸出</p>
+                    </div>
+                    <div class="concept-card">
+                        <h3>✅ 持續優化</h3>
+                        <p>迭代式優化提示詞，不斷提升品質</p>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="Part5.html" class="nav-btn" style="background: #1e3c72; padding: 15px 40px; font-size: 18px;">
+                        前往 Part 5：Google Forms API 實作 ➡️
+                    </a>
+                </div>
+                <div class="footer-credit">© 2026 自己架設 AI - 零基礎到大師 | Made with 曾慶良(阿亮老師) ❤️</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="nav-arrow prev-arrow" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+    <button class="nav-arrow next-arrow" id="nextBtn" onclick="changeSlide(1)">❯</button>
+    <div class="indicators" id="indicatorContainer"></div>
+
+    <script>
+        let currentSlide = 0; const slides = document.querySelectorAll('.slide'); const totalSlides = slides.length;
+        function init() { createIndicators(); showSlide(0); updateButtons(); document.addEventListener('keydown', handleKeydown); }
+        function handleKeydown(e) { if (e.key === 'ArrowLeft') changeSlide(-1); if (e.key === 'ArrowRight') changeSlide(1); }
+        function createIndicators() { const container = document.getElementById('indicatorContainer'); container.innerHTML = ''; slides.forEach((_, index) => { const dot = document.createElement('div'); dot.className = 'dot'; dot.onclick = () => goToSlide(index); container.appendChild(dot); }); }
+        function showSlide(index) { if (index < 0) index = 0; if (index >= totalSlides) index = totalSlides - 1; slides.forEach(slide => slide.classList.remove('active')); slides[index].classList.add('active'); currentSlide = index; document.querySelectorAll('.dot').forEach((dot, idx) => dot.classList.toggle('active', idx === index)); updateButtons(); }
+        function changeSlide(direction) { showSlide(currentSlide + direction); } function goToSlide(index) { showSlide(index); }
+        function updateButtons() { document.getElementById('prevBtn').disabled = currentSlide === 0; document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1; }
+        init();
+    </script>
+</body>
+</html>
