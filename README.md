@@ -183,16 +183,16 @@ waitress-serve --port=8000 app:app
 ### 支援的 AI 模型
 
 #### Google Gemini
-- gemini-2.5-flash（推薦，速度快）
-- gemini-2.5-pro
-- gemini-2.0-flash
-- gemini-2.0-pro
+- gemini-3.5-flash（推薦，速度快）
+- gemini-3.5-pro
+- gemini-3.5-flash
+- gemini-3.5-pro
 
 #### OpenAI（選用）
-- gpt-4o
-- gpt-4.1
-- gpt-4-turbo
-- gpt-4.5-preview
+- gpt-5.5
+- gpt-5.5
+- gpt-5.5
+- gpt-5.5
 
 ### 常見問題排解
 

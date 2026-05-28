@@ -111,7 +111,7 @@ function monthlyAutoSurvey() {
 
   const data = {
     apiKey: PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY'),
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.5-flash',
     category: `${currentMonth}月顧客滿意度調查`,
     questionCount: row[3],
     keywords: row[1],

@@ -45,7 +45,7 @@ function doPost(e) {
 // =====================================================
 function callGeminiAPI(data) {
   const apiKey = data.apiKey;
-  const model = data.model || 'gemini-2.5-flash';
+  const model = data.model || 'gemini-3.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const prompt = buildPrompt(data);
@@ -81,7 +81,7 @@ function callGeminiAPI(data) {
 // =====================================================
 function callOpenAIAPI(data) {
   const apiKey = data.apiKey;
-  const model = data.model || 'gpt-4o';
+  const model = data.model || 'gpt-5.5';
   const url = 'https://api.openai.com/v1/chat/completions';
 
   const prompt = buildPrompt(data);
